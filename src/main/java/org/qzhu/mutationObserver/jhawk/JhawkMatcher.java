@@ -20,12 +20,7 @@ public class JhawkMatcher {
     public static void main(String args[]) throws IOException {
 
         String []  projects = {
-                "Bukkit-1.7.9-R0.2",
-                "commons-lang-LANG_3_7",
-                "commons-math-MATH_3_6_1",
-                "java-apns-apns-0.2.3",
-                "jfreechart-1.5.0",
-                "pysonar2-2.1"};
+                "jackson-core"};
 
         for (String project: projects){
             gatherJhawkData(project);
@@ -36,11 +31,10 @@ public class JhawkMatcher {
     public static void gatherJhawkData(String project) throws IOException {
         System.out.println("Analysing "+project);
 
-        String baseDir = "/Users/qianqianzhu/phd/testability/ast/project/";
+        String baseDir = "C:/Users/super/Documents/GitHub/demasterr/";
         String testDir = baseDir+project+"/src/main/java/";
         String sourceClassDir = baseDir+project+"/target/classes/";
         String testClassDir = baseDir+project+"/target/test-classes/";
-
         List<String> fileNames = new ArrayList<>();
         fileNames = Utils.getAllFilesFromDir(fileNames,".java",testDir);
 
@@ -55,18 +49,18 @@ public class JhawkMatcher {
         System.out.println("Total method no.: "+totalMethod);
 
         System.out.println("Parsing Pitest results...");
-        String pitestFileName = "/Users/qianqianzhu/phd/testability/mutation_testing_observability/pitest_result/"+project+"_mutations.csv";
+        String pitestFileName = baseDir+project+"/target/pit-reports/201904081347/mutations.csv";
         Utils.parsePitestFile(pitestFileName,allMethodInfo);
 
         System.out.println("Parsing test classes results...");
         Utils.setAllMethodDirectTestFromDir(sourceClassDir,testClassDir,allMethodInfo);
 
         System.out.println("Parsing Jhawk results...");
-        String jhawkFileMethod = "/Users/qianqianzhu/phd/testability/ast/jhawk/"+project+"/"+project+"_method.csv";
-        String jhawkFileClass = "/Users/qianqianzhu/phd/testability/ast/jhawk/"+project+"/"+project+"_class.csv";
-        String jhawkAll = "/Users/qianqianzhu/phd/testability/ast/jhawk/"+project+"/"+project+"_all.csv";
+        String jhawkFileMethod = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+"-method.csv";
+        String jhawkFileClass = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+"-class.csv";
+        String jhawkAll = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+".csv";
         combineJhawkResults(jhawkFileMethod,jhawkFileClass,jhawkAll);
-        String resultFilename = "/Users/qianqianzhu/phd/testability/ast/jhawk/all/"+project+"_all_result.csv";
+        String resultFilename = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+"_all_result.csv";
         matchJhawkMethod(jhawkAll,resultFilename,allMethodInfo);
     }
 
@@ -140,7 +134,7 @@ public class JhawkMatcher {
                 keysb.append(columns[1] + "." + columns[2]);  // className
                 for(int i=3;i<43;i++) {
                     columns[i] = columns[i].replace(",", "."); // replace ',' to '.' as decimal point in Jhawk file is ","
-                    if((i!=29)) // drop columns[29]: Superclass
+                    if((i!=41)) // drop columns[41]: Superclass
                         valuesb.append(";"+columns[i]);
                 }
                 jhawClassMap.put(keysb.toString(),valuesb.toString());
@@ -181,10 +175,10 @@ public class JhawkMatcher {
                 String columns[] = line.split(";");  // total column no.: 31
                 // remove class name suffix by Jhawk
                 String[] splits = columns[2].split("\\$");
-                StringBuffer newClassName = new StringBuffer();
+                StringBuilder newClassName = new StringBuilder();
                 for (String split: splits){
                     if(matchesEndWithSuffix(split)){
-                        int end = split.lastIndexOf("_");
+                        int end = split.lastIndexOf('_');
                         split = split.substring(0,end);
                     }
                     newClassName.append(split+"$");
@@ -201,13 +195,13 @@ public class JhawkMatcher {
                 // remove method name suffix by Jhawk
                 String methodName = columns[3];
                 if (matchesEndWithSuffix(methodName)){
-                    int end = methodName.lastIndexOf("_");
+                    int end = methodName.lastIndexOf('_');
                     methodName = methodName.substring(0,end);
                 }
 
                 if (columns[2].equals(columns[3]) ||
                         // nested class case
-                        (columns[2].contains("$") && columns[2].substring(columns[2].lastIndexOf("$") + 1).equals(columns[3]))) {
+                        (columns[2].contains("$") && columns[2].substring(columns[2].lastIndexOf('$') + 1).equals(columns[3]))) {
                     lineSB.append(":<init>");
 
                 } else {
