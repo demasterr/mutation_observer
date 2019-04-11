@@ -175,6 +175,8 @@ public class JhawkMatcher {
             while ((line = jhawkReader.readLine()) != null) {
                 if(line.contains("System;Package;Class;Name; COMP;"))
                     continue; // skip header line
+                if(line.startsWith("System overview"))
+                	break; // Everything after this line is not interesting.
                 StringBuffer lineSB = new StringBuffer();
                 line = line.replace("\"", "");  // remove '"' surrounded by texts
 
