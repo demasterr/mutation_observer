@@ -19,8 +19,9 @@ public class JhawkMatcher {
 
     public static void main(String args[]) throws IOException {
 
+    	// Change this line to the location of your project.
         String []  projects = {
-                "jackson-core"};
+                "minimal-json"};
 
         for (String project: projects){
             gatherJhawkData(project);
@@ -31,10 +32,13 @@ public class JhawkMatcher {
     public static void gatherJhawkData(String project) throws IOException {
         System.out.println("Analysing "+project);
 
-        String baseDir = "C:/Users/super/Documents/GitHub/demasterr/";
-        String testDir = baseDir+project+"/src/main/java/";
-        String sourceClassDir = baseDir+project+"/target/classes/";
-        String testClassDir = baseDir+project+"/target/test-classes/";
+        // Change if there is an extra folder in the project folder.
+        String extraDir = "";
+        // Set absolute path to the folder in which the project folder is located (probably the GitHub folder).
+        String baseDir = "C:/Users/Frenk/Documents/GitHub/";
+        String testDir = baseDir+project+extraDir+"/src/main/java/";
+        String sourceClassDir = baseDir+project+extraDir+"/target/classes/";
+        String testClassDir = baseDir+project+extraDir+"/target/test-classes/";
         List<String> fileNames = new ArrayList<>();
         fileNames = Utils.getAllFilesFromDir(fileNames,".java",testDir);
 
@@ -49,18 +53,20 @@ public class JhawkMatcher {
         System.out.println("Total method no.: "+totalMethod);
 
         System.out.println("Parsing Pitest results...");
-        String pitestFileName = baseDir+project+"/target/pit-reports/201904081347/mutations.csv";
+        // Change this line to the location of the pit results.
+        String pitestFileName = baseDir+project+extraDir+"/target/pit-reports/201904111358/mutations.csv";
         Utils.parsePitestFile(pitestFileName,allMethodInfo);
 
         System.out.println("Parsing test classes results...");
         Utils.setAllMethodDirectTestFromDir(sourceClassDir,testClassDir,allMethodInfo);
 
         System.out.println("Parsing Jhawk results...");
-        String jhawkFileMethod = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+"-method.csv";
-        String jhawkFileClass = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+"-class.csv";
-        String jhawkAll = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+".csv";
+        String jhawkPath = "mutant_observer_scripts/JHawkStarter/Output/";
+        String jhawkFileMethod = baseDir + jhawkPath + project + "-method.csv";
+        String jhawkFileClass = baseDir + jhawkPath + project + "-class.csv";
+        String jhawkAll = baseDir + jhawkPath + project+".csv";
         combineJhawkResults(jhawkFileMethod,jhawkFileClass,jhawkAll);
-        String resultFilename = baseDir + "mutant_observer_scripts/JHawkStarter/Output/"+project+"_all_result.csv";
+        String resultFilename = baseDir + jhawkPath + project+"_all_result.csv";
         matchJhawkMethod(jhawkAll,resultFilename,allMethodInfo);
     }
 
